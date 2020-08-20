@@ -79,6 +79,8 @@ class OrbitMainWindow : public QMainWindow {
   void on_actionServiceNullPointerDereference_triggered();
   void on_actionServiceStackOverflow_triggered();
 
+  void on_actionShowWizard_triggered();
+
   void ShowCaptureOnSaveWarningIfNeeded();
 
  private:
@@ -91,6 +93,8 @@ class OrbitMainWindow : public QMainWindow {
   Ui::OrbitMainWindow* ui;
   QTimer* m_MainTimer = nullptr;
   std::vector<OrbitGLWidget*> m_GlWidgets;
+
+  std::unique_ptr<QDialog> tutorial_dialog_;
 
   // Capture toolbar.
   QLabel* timer_label_ = nullptr;

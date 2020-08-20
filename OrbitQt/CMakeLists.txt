@@ -32,6 +32,7 @@ target_sources(
           resource.h
           servicedeploymanager.h
           TopDownViewItemModel.h
+		  TutorialOverlay.h
           topdownwidget.h)
 
 target_sources(
@@ -62,7 +63,10 @@ target_sources(
           servicedeploymanager.cpp
           TopDownViewItemModel.cpp
           topdownwidget.cpp
-          ../icons/orbiticons.qrc)
+		  TutorialOverlay.cpp
+		  TutorialOverlay.ui
+          ../icons/orbiticons.qrc
+		  ../images/orbitimages.qrc)
 
 target_include_directories(OrbitQt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 

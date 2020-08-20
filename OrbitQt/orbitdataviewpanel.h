@@ -32,6 +32,8 @@ class OrbitDataViewPanel : public QWidget {
   OrbitTreeView* GetTreeView();
   QLineEdit* GetFilterLineEdit();
 
+  Ui::OrbitDataViewPanel* GetUi() { return ui; }
+
  private slots:
   void on_FilterLineEdit_textEdited(const QString& a_Text);
   void on_refreshButton_clicked();

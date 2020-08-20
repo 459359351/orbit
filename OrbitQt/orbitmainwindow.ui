@@ -248,6 +248,7 @@
      <string>Help</string>
     </property>
     <addaction name="actionAbout"/>
+    <addaction name="actionShowWizard"/>
    </widget>
    <widget class="QMenu" name="menuFeedback">
     <property name="title">
@@ -447,6 +448,11 @@
   <action name="actionServiceStackOverflow">
    <property name="text">
     <string>[Service] Stack Overflow</string>
+   </property>
+  </action>
+  <action name="actionShowWizard">
+   <property name="text">
+    <string>Show Wizard</string>
    </property>
   </action>
  </widget>

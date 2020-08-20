@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="images">
+    <file>tutorial/load_symbols.png</file>
+    <file>tutorial/select_process.png</file>
+  </qresource>
+</RCC>

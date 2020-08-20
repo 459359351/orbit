@@ -23,6 +23,8 @@ class ProcessLauncherWidget : public QWidget {
   void Refresh();
   void SetDataView(DataView* data_view);
 
+  [[nodiscard]] Ui::ProcessLauncherWidget* GetUi() { return ui; }
+
  private:
   Ui::ProcessLauncherWidget* ui;
 };
