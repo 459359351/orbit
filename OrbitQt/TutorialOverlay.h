@@ -9,6 +9,8 @@
 #include <qlabel.h>
 #include <qpoint.h>
 
+#include "CutoutWidget.h"
+
 namespace Ui {
 class TutorialOverlay;
 }
@@ -43,6 +45,7 @@ class TutorialOverlay : public QDialog {
   QPoint anchor_offset_;
 
   QLabel* hint_label_ = nullptr;
+  CutoutWidget* cutout_ = nullptr;
 
   int current_step_ = 0;
 

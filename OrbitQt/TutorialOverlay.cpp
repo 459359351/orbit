@@ -1,7 +1,9 @@
 #include "TutorialOverlay.h"
 
 #include <qlabel.h>
+#include <qpushbutton.h>
 #include <qregion.h>
+#include <qtabbar.h>
 
 #include "OrbitBase/Logging.h"
 #include "ui_TutorialOverlay.h"
@@ -19,10 +21,14 @@ TutorialOverlay::TutorialOverlay(QWidget* parent)
     border_labels_.push_back(std::move(label));
   }
 
-  ui_->borderLabel->setStyleSheet(
-      "border: 7px solid #4285F4; "
-      "border-radius: 60px 20px 60px 20px / 20px 60px 20px 60px;");
-  ui_->borderLabel->raise();
+  ui_->tabWidget->raise();
+  ui_->bottomBar->raise();
+  ui_->errorHint->hide();
+  QTabBar* tabBar = ui_->tabWidget->findChild<QTabBar*>();
+  tabBar->hide();
+
+  QObject::connect(ui_->btnClose, &QPushButton::clicked, this, &QDialog::close);
+  QObject::connect(ui_->btnNext, &QPushButton::clicked, this, &TutorialOverlay::NextStep);
 }
 
 const QRect TutorialOverlay::AbsoluteGeometry(QWidget* widget) {
@@ -59,20 +65,19 @@ void TutorialOverlay::AnchorToWidget(QWidget* widget, HintAnchor anchor_type,
 }
 
 void TutorialOverlay::ShowStep(int step) {
-  ui_->hintLabel1->hide();
-  ui_->hintLabel2->hide();
+  current_step_ = step;
 
-  switch (step) {
-    case 0:
-      hint_label_ = ui_->hintLabel1;
-      break;
-    case 1:
-      hint_label_ = ui_->hintLabel2;
-      break;
-  }
+  anchor_widget_ = nullptr;
+  anchor_offset_ = QPoint(0, 0);
+  hint_label_ = nullptr;
 
+  ui_->errorHint->hide();
+
+  ui_->tabWidget->setCurrentIndex(step);
+  hint_label_ = ui_->tabWidget->widget(step)->findChild<QLabel*>();
+  cutout_ = ui_->tabWidget->widget(step)->findChild<CutoutWidget*>();
   hint_label_->raise();
-  hint_label_->show();
+  cutout_->raise();
 
   steps_[current_step_](this);
 
@@ -82,7 +87,7 @@ void TutorialOverlay::ShowStep(int step) {
 
 void TutorialOverlay::NextStep() {
   if (current_step_ < steps_.size() - 1) {
-    ShowStep(++current_step_);
+    ShowStep(current_step_ + 1);
   } else {
     close();
   }
@@ -115,26 +120,38 @@ void TutorialOverlay::UpdateEventFilter(QWidget* widget) {
 static const auto margin = QPoint(20, 20);
 
 void TutorialOverlay::UpdateGeometry() {
-  auto target_rect = AbsoluteGeometry(anchor_widget_);
-  auto outer_rect = target_rect;
-  outer_rect.setTopLeft(outer_rect.topLeft() - margin);
-  outer_rect.setBottomRight(outer_rect.bottomRight() + margin);
+  setGeometry(dynamic_cast<QWidget*>(parent())->rect());
 
-  QRegion maskedRegion(QRegion(QRect(rect())).subtracted(QRegion(target_rect)));
-  setMask(maskedRegion);
+  if (anchor_widget_) {
+    auto target_rect = AbsoluteGeometry(anchor_widget_);
+    auto outer_rect = target_rect;
+    outer_rect.setTopLeft(outer_rect.topLeft() - margin);
+    outer_rect.setBottomRight(outer_rect.bottomRight() + margin);
 
-  ui_->borderLabel->setGeometry(outer_rect);
+    QRegion maskedRegion(QRegion(QRect(rect())).subtracted(QRegion(target_rect)));
+    setMask(maskedRegion);
 
-  const auto label_rect = hint_label_->rect();
-  const auto label_pos = GetLabelBasePosition(target_rect, label_rect);
-  hint_label_->setGeometry(label_pos.x(), label_pos.y(), label_rect.width(), label_rect.height());
+    cutout_->setGeometry(outer_rect);
 
-  border_labels_[0]->setGeometry(0, 0, rect().width(), target_rect.top());
-  border_labels_[1]->setGeometry(0, target_rect.bottom(), rect().width(),
-                                 rect().height() - target_rect.bottom());
-  border_labels_[2]->setGeometry(0, target_rect.top(), target_rect.left(), target_rect.height());
-  border_labels_[3]->setGeometry(target_rect.right(), target_rect.top(),
-                                 rect().width() - target_rect.right(), target_rect.height());
+    if (hint_label_) {
+      const auto label_rect = hint_label_->rect();
+      const auto label_pos = GetLabelBasePosition(target_rect, label_rect);
+      hint_label_->setGeometry(label_pos.x(), label_pos.y(), label_rect.width(),
+                               label_rect.height());
+    }
+
+    border_labels_[0]->setGeometry(0, 0, rect().width(), target_rect.top());
+    border_labels_[1]->setGeometry(0, target_rect.bottom(), rect().width(),
+                                   rect().height() - target_rect.bottom());
+    border_labels_[2]->setGeometry(0, target_rect.top(), target_rect.left(), target_rect.height());
+    border_labels_[3]->setGeometry(target_rect.right(), target_rect.top(),
+                                   rect().width() - target_rect.right(), target_rect.height());
+  } else {
+    border_labels_[0]->setGeometry(rect());
+    border_labels_[1]->setGeometry(0, 0, 0, 0);
+    border_labels_[2]->setGeometry(0, 0, 0, 0);
+    border_labels_[3]->setGeometry(0, 0, 0, 0);
+  }
 }
 
 QPoint TutorialOverlay::GetLabelBasePosition(QRect widget_rect, QRect label_rect) {
