@@ -24,22 +24,46 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QPushButton {
-border: 7px solid #4285F4;
-padding: 10px;
-border-radius: 20px 5px 20px 5px / 1px 20px 4px 20px;
-font-weight: bold;
-font-family: Calibri;
-font-size: 12pt;
+	border: 7px solid #4285F4;
+	padding: 10px;
+	border-radius: 20px 5px 20px 5px / 1px 20px 4px 20px;
+	font-weight: bold;
+	font-family: Calibri;
+	font-size: 12pt;
+}
+
+QDialog {
+	padding: 0;
+	margin: 0;
 }</string>
   </property>
   <property name="modal">
    <bool>true</bool>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="styleSheet">
-      <string notr="true">QTabWidget::pane { border: 0; }</string>
+      <string notr="true">QTabWidget::pane { 
+	border: 0;
+	margin: 0;
+	padding: 0;
+}</string>
      </property>
      <property name="currentIndex">
       <number>0</number>
@@ -48,30 +72,11 @@ font-size: 12pt;
       <attribute name="title">
        <string>Tab 1</string>
       </attribute>
-      <widget class="QLabel" name="mainHint">
-       <property name="geometry">
-        <rect>
-         <x>150</x>
-         <y>130</y>
-         <width>751</width>
-         <height>151</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="pixmap">
-        <pixmap resource="../images/orbitimages.qrc">:/images/tutorial/select_process.png</pixmap>
-       </property>
-       <property name="scaledContents">
-        <bool>false</bool>
-       </property>
-      </widget>
-      <widget class="CutoutWidget" name="borderLabel">
+      <widget class="QLabel" name="borderLabel">
        <property name="geometry">
         <rect>
          <x>30</x>
-         <y>330</y>
+         <y>110</y>
          <width>171</width>
          <height>141</height>
         </rect>
@@ -86,6 +91,142 @@ border-radius: 60px 20px 60px 20px / 20px 60px 20px 60px;</string>
        <property name="scaledContents">
         <bool>true</bool>
        </property>
+      </widget>
+      <widget class="QFrame" name="frame">
+       <property name="geometry">
+        <rect>
+         <x>210</x>
+         <y>150</y>
+         <width>631</width>
+         <height>261</height>
+        </rect>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="QLabel" name="label_2">
+        <property name="geometry">
+         <rect>
+          <x>190</x>
+          <y>30</y>
+          <width>401</width>
+          <height>71</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">border-image: url(:/images/tutorial/blue_callout.png) 0 0 0 0 stretch stretch;
+font: 32pt 'Caveat';
+padding: 5px;</string>
+        </property>
+        <property name="text">
+         <string>Select a process</string>
+        </property>
+        <property name="scaledContents">
+         <bool>false</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="wordWrap">
+         <bool>false</bool>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>191</width>
+          <height>81</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap resource="../images/orbitimages.qrc">:/images/tutorial/arrow_left4.png</pixmap>
+        </property>
+        <property name="scaledContents">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QFrame" name="frame_2">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>-10</y>
+         <width>521</width>
+         <height>111</height>
+        </rect>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="QLabel" name="label_3">
+        <property name="geometry">
+         <rect>
+          <x>130</x>
+          <y>40</y>
+          <width>331</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">border-image: url(:/images/tutorial/yellow_callout.png) 0 0 0 0 stretch stretch;
+font: 12pt 'Caveat';
+padding: 5px;</string>
+        </property>
+        <property name="text">
+         <string>Tip: You can filter the list by typing here!</string>
+        </property>
+        <property name="scaledContents">
+         <bool>false</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="wordWrap">
+         <bool>false</bool>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_4">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>50</y>
+          <width>121</width>
+          <height>61</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap resource="../images/orbitimages.qrc">:/images/tutorial/arrow_down1.png</pixmap>
+        </property>
+        <property name="scaledContents">
+         <bool>true</bool>
+        </property>
+       </widget>
       </widget>
      </widget>
      <widget class="QWidget" name="tab_2">
@@ -105,13 +246,13 @@ border-radius: 60px 20px 60px 20px / 20px 60px 20px 60px;</string>
         <string/>
        </property>
        <property name="pixmap">
-        <pixmap resource="../images/orbitimages.qrc">:/images/tutorial/load_symbols.png</pixmap>
+        <pixmap>:/images/tutorial/load_symbols.png</pixmap>
        </property>
        <property name="scaledContents">
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="CutoutWidget" name="borderLabel_2">
+      <widget class="QLabel" name="borderLabel_2">
        <property name="geometry">
         <rect>
          <x>90</x>
@@ -204,16 +345,8 @@ border-radius: 60px 5px 60px 5px / 1px 30px 4px 30px;</string>
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>CutoutWidget</class>
-   <extends>QLabel</extends>
-   <header>CutoutWidget.h</header>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="../images/orbitimages.qrc"/>
-  <include location="../../../Users/freichl/.designer/images/orbitimages.qrc"/>
  </resources>
  <connections/>
  <slots>

@@ -193,6 +193,9 @@ static void StyleOrbit(QApplication& app) {
   app.setStyleSheet(
       "QToolTip { color: #ffffff; background-color: #2a82da; border: 1px "
       "solid white; }");
+
+  QFontDatabase::addApplicationFont("C:\\development\\Orbit\\fonts\\Caveat-Regular.ttf");
+  QFontDatabase::addApplicationFont("C:\\development\\Orbit\\fonts\\Caveat-Bold.ttf");
 }
 
 static std::optional<OrbitQt::DeploymentConfiguration> FigureOutDeploymentConfiguration() {

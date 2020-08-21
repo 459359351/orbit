@@ -20,38 +20,43 @@ class TutorialOverlay : public QDialog {
 
  public:
   using InitStep = std::function<void(TutorialOverlay* overlay)>;
-  enum class HintAnchor { kTopLeft, kTopRight, kBottomRight, kBottomLeft };
 
   explicit TutorialOverlay(QWidget* parent);
   ~TutorialOverlay() override;
-
-  void AnchorToWidget(QWidget* widget, HintAnchor anchor_type = HintAnchor::kTopRight,
-                      const QPoint& anchor_offset = QPoint(0, 0));
 
   void ShowStep(int step);
   void NextStep();
 
   bool eventFilter(QObject* object, QEvent* event) override;
 
-  void AddStep(InitStep step) { steps_.push_back(std::move(step)); }
+  void SetupStep(int step, QWidget* anchor_widget = nullptr, InitStep callback = nullptr);
 
  private:
+  enum class HintAnchor { kTopLeft, kTopRight, kBottomRight, kBottomLeft };
+  struct Hint {
+    QWidget* widget = nullptr;
+    HintAnchor anchor = HintAnchor::kTopLeft;
+    QPoint offset = QPoint(0, 0);
+  };
+
+  struct Step {
+    InitStep callback = nullptr;
+    std::vector<Hint> hints;
+    QWidget* anchor_widget = nullptr;
+    QWidget* cutout_widget = nullptr;
+  };
+
   std::unique_ptr<Ui::TutorialOverlay> ui_;
   std::vector<std::unique_ptr<QWidget>> border_labels_;
-  std::vector<InitStep> steps_;
+  std::vector<Step> steps_;
 
-  QWidget* anchor_widget_ = nullptr;
-  HintAnchor anchor_type_ = HintAnchor::kTopRight;
-  QPoint anchor_offset_;
+  int current_step_ = -1;
 
-  QLabel* hint_label_ = nullptr;
-  CutoutWidget* cutout_ = nullptr;
-
-  int current_step_ = 0;
-
+  void InitializeStepsFromUi();
   void UpdateEventFilter(QWidget* widget);
   void UpdateGeometry();
-  [[nodiscard]] QPoint GetLabelBasePosition(QRect widget_rect, QRect label_rect);
+  [[nodiscard]] Hint DeriveHintDescription(QRect anchor_rect, QWidget* hint_widget);
+  void UpdateHintWidgetPosition(QRect anchor_rect, Hint& hint);
 
   [[nodiscard]] const QRect AbsoluteGeometry(QWidget* widget);
 };

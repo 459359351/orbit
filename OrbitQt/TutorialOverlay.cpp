@@ -1,5 +1,6 @@
 #include "TutorialOverlay.h"
 
+#include <qframe.h>
 #include <qlabel.h>
 #include <qpushbutton.h>
 #include <qregion.h>
@@ -27,8 +28,29 @@ TutorialOverlay::TutorialOverlay(QWidget* parent)
   QTabBar* tabBar = ui_->tabWidget->findChild<QTabBar*>();
   tabBar->hide();
 
+  InitializeStepsFromUi();
+
   QObject::connect(ui_->btnClose, &QPushButton::clicked, this, &QDialog::close);
   QObject::connect(ui_->btnNext, &QPushButton::clicked, this, &TutorialOverlay::NextStep);
+}
+
+void TutorialOverlay::InitializeStepsFromUi() {
+  for (int tab_i = 0; tab_i < ui_->tabWidget->count(); ++tab_i) {
+    QWidget* tab = ui_->tabWidget->widget(tab_i);
+
+    Step step;
+    step.cutout_widget = tab->findChild<QLabel*>();
+    if (step.cutout_widget) {
+      QRect cutout_rect = step.cutout_widget->rect();
+      for (auto frame : tab->findChildren<QFrame*>()) {
+        if (frame != step.cutout_widget && frame->parent() == tab) {
+          step.hints.push_back(DeriveHintDescription(cutout_rect, frame));
+        }
+      }
+    }
+
+    steps_.push_back(std::move(step));
+  }
 }
 
 const QRect TutorialOverlay::AbsoluteGeometry(QWidget* widget) {
@@ -56,31 +78,23 @@ const QRect TutorialOverlay::AbsoluteGeometry(QWidget* widget) {
 
 TutorialOverlay::~TutorialOverlay() {}
 
-void TutorialOverlay::AnchorToWidget(QWidget* widget, HintAnchor anchor_type,
-                                     const QPoint& anchor_offset) {
-  anchor_offset_ = anchor_offset;
-  anchor_type_ = anchor_type;
-  UpdateEventFilter(widget);
-  UpdateGeometry();
-}
-
 void TutorialOverlay::ShowStep(int step) {
+  if (current_step_ >= 0) {
+    if (steps_[current_step_].anchor_widget != nullptr) {
+      steps_[current_step_].anchor_widget->removeEventFilter(this);
+    }
+  }
+
   current_step_ = step;
-
-  anchor_widget_ = nullptr;
-  anchor_offset_ = QPoint(0, 0);
-  hint_label_ = nullptr;
-
   ui_->errorHint->hide();
 
   ui_->tabWidget->setCurrentIndex(step);
-  hint_label_ = ui_->tabWidget->widget(step)->findChild<QLabel*>();
-  cutout_ = ui_->tabWidget->widget(step)->findChild<CutoutWidget*>();
-  hint_label_->raise();
-  cutout_->raise();
 
-  steps_[current_step_](this);
+  if (steps_[current_step_].callback) {
+    steps_[current_step_].callback(this);
+  }
 
+  UpdateEventFilter(steps_[current_step_].anchor_widget);
   showMaximized();
   UpdateGeometry();
 }
@@ -94,7 +108,7 @@ void TutorialOverlay::NextStep() {
 }
 
 bool TutorialOverlay::eventFilter(QObject* object, QEvent* event) {
-  if (object != anchor_widget_) {
+  if (object != steps_[current_step_].anchor_widget) {
     return false;
   }
 
@@ -105,25 +119,30 @@ bool TutorialOverlay::eventFilter(QObject* object, QEvent* event) {
   return false;
 }
 
+void TutorialOverlay::SetupStep(int step, QWidget* anchor_widget, InitStep callback) {
+  CHECK(step >= 0);
+  CHECK(step < steps_.size());
+
+  steps_[step].anchor_widget = anchor_widget;
+  steps_[step].callback = callback;
+}
+
 void TutorialOverlay::UpdateEventFilter(QWidget* widget) {
-  if (anchor_widget_ != nullptr) {
-    anchor_widget_->removeEventFilter(this);
+  if (widget == nullptr) {
+    return;
   }
 
-  anchor_widget_ = widget;
-
-  if (anchor_widget_ != nullptr) {
-    anchor_widget_->installEventFilter(this);
-  }
+  widget->installEventFilter(this);
 }
 
 static const auto margin = QPoint(20, 20);
 
 void TutorialOverlay::UpdateGeometry() {
   setGeometry(dynamic_cast<QWidget*>(parent())->rect());
+  Step& step = steps_[current_step_];
 
-  if (anchor_widget_) {
-    auto target_rect = AbsoluteGeometry(anchor_widget_);
+  if (step.anchor_widget != nullptr && step.cutout_widget != nullptr) {
+    auto target_rect = AbsoluteGeometry(step.anchor_widget);
     auto outer_rect = target_rect;
     outer_rect.setTopLeft(outer_rect.topLeft() - margin);
     outer_rect.setBottomRight(outer_rect.bottomRight() + margin);
@@ -131,13 +150,10 @@ void TutorialOverlay::UpdateGeometry() {
     QRegion maskedRegion(QRegion(QRect(rect())).subtracted(QRegion(target_rect)));
     setMask(maskedRegion);
 
-    cutout_->setGeometry(outer_rect);
+    step.cutout_widget->setGeometry(outer_rect);
 
-    if (hint_label_) {
-      const auto label_rect = hint_label_->rect();
-      const auto label_pos = GetLabelBasePosition(target_rect, label_rect);
-      hint_label_->setGeometry(label_pos.x(), label_pos.y(), label_rect.width(),
-                               label_rect.height());
+    for (auto& hint : step.hints) {
+      UpdateHintWidgetPosition(target_rect, hint);
     }
 
     border_labels_[0]->setGeometry(0, 0, rect().width(), target_rect.top());
@@ -154,22 +170,74 @@ void TutorialOverlay::UpdateGeometry() {
   }
 }
 
-QPoint TutorialOverlay::GetLabelBasePosition(QRect widget_rect, QRect label_rect) {
-  switch (anchor_type_) {
-    case HintAnchor::kTopLeft:
-      return widget_rect.topLeft() + QPoint(-margin.x() + anchor_offset_.x(),
-                                            -label_rect.height() - margin.y() + anchor_offset_.y());
-    case HintAnchor::kTopRight:
-      return widget_rect.topRight() +
-             QPoint(margin.x() + anchor_offset_.x(),
-                    -label_rect.height() - margin.y() + anchor_offset_.y());
-    case HintAnchor::kBottomRight:
-      return widget_rect.bottomRight() +
-             QPoint(margin.x() + anchor_offset_.x(), margin.y() + anchor_offset_.y());
-    case HintAnchor::kBottomLeft:
-      return widget_rect.bottomLeft() +
-             QPoint(-margin.x() + anchor_offset_.x(), margin.y() + anchor_offset_.y());
+TutorialOverlay::Hint TutorialOverlay::DeriveHintDescription(QRect anchor_rect,
+                                                             QWidget* hint_widget) {
+  QRect hint_rect = hint_widget->rect();
+
+  // The anchor position is determined by the quadrant of anchor_rect in which the top
+  // left corner of hint_rect is placed initially.
+  Hint result;
+  result.widget = hint_widget;
+
+  if (hint_rect.x() < anchor_rect.x() + anchor_rect.width() / 2) {
+    if (hint_rect.y() < anchor_rect.y() + anchor_rect.height() / 2) {
+      result.anchor = HintAnchor::kTopLeft;
+    } else {
+      result.anchor = HintAnchor::kBottomLeft;
+    }
+  } else {
+    if (hint_rect.y() < anchor_rect.y() + anchor_rect.height() / 2) {
+      result.anchor = HintAnchor::kTopRight;
+    } else {
+      result.anchor = HintAnchor::kBottomRight;
+    }
   }
 
-  UNREACHABLE();
+  switch (result.anchor) {
+    // Anchored top left: Top right label corner is reference
+    case HintAnchor::kTopLeft:
+      result.offset = hint_rect.topRight() - anchor_rect.topLeft();
+      break;
+    // Anchored top right: Top left label corner is reference
+    case HintAnchor::kTopRight:
+      result.offset = hint_rect.topLeft() - anchor_rect.topRight();
+      break;
+    // Anchored bottom right: Top left label corner is reference
+    case HintAnchor::kBottomRight:
+      result.offset = hint_rect.topLeft() - anchor_rect.bottomRight();
+      break;
+    // Anchored bottom left: Top right label corner is reference
+    case HintAnchor::kBottomLeft:
+      result.offset = hint_rect.topRight() - anchor_rect.bottomLeft();
+      break;
+  }
+
+  return result;
+}
+
+void TutorialOverlay::UpdateHintWidgetPosition(QRect anchor_rect, Hint& hint) {
+  const QPoint size(hint.widget->rect().width(), hint.widget->rect().height());
+  QPoint tl, br, tr, bl;
+
+  // See comments in DeriveHintDescription() on how offsets and anchors
+  // are calculated
+  switch (hint.anchor) {
+    case HintAnchor::kTopLeft:
+      tr = anchor_rect.topLeft() + hint.offset;
+      tl = tr - QPoint(0, size.y());
+      break;
+    case HintAnchor::kTopRight:
+      tl = anchor_rect.topRight() + hint.offset;
+      break;
+    case HintAnchor::kBottomRight:
+      tl = anchor_rect.bottomRight() + hint.offset;
+      break;
+    case HintAnchor::kBottomLeft:
+      tr = anchor_rect.bottomLeft() + hint.offset;
+      tl = tr - QPoint(0, size.y());
+      break;
+  }
+
+  br = tl + size;
+  hint.widget->setGeometry(QRect(tl, br));
 }

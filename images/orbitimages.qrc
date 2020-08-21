@@ -1,6 +1,23 @@
 <RCC>
   <qresource prefix="images">
-    <file>tutorial/load_symbols.png</file>
-    <file>tutorial/select_process.png</file>
+    <file>tutorial/arrow_down2.png</file>
+    <file>tutorial/arrow_left1.png</file>
+    <file>tutorial/arrow_left2.png</file>
+    <file>tutorial/arrow_left3.png</file>
+    <file>tutorial/arrow_left4.png</file>
+    <file>tutorial/arrow_up1.png</file>
+    <file>tutorial/arrow_up2.png</file>
+    <file>tutorial/arrow_down1.png</file>
+    <file>tutorial/arrow_right1.png</file>
+    <file>tutorial/arrow_right2.png</file>
+    <file>tutorial/arrow_right3.png</file>
+    <file>tutorial/arrow_right4.png</file>
+    <file>tutorial/blue_callout.png</file>
+    <file>tutorial/green_callout.png</file>
+    <file>tutorial/yellow_callout.png</file>
+  </qresource>
+  <qresource prefix="fonts">
+    <file>../fonts/Caveat-Bold.ttf</file>
+    <file>../fonts/Caveat-Regular.ttf</file>
   </qresource>
 </RCC>
