@@ -598,11 +598,13 @@ void OrbitMainWindow::on_actionShowWizard_triggered() {
   dlg = std::make_unique<TutorialOverlay>(this);
 
   dlg->SetupStep(0, ui->ProcessesList->GetUi()->LiveProcessList, [this](TutorialOverlay* overlay) {
+    ui->MainTabWidget->setCurrentIndex(0);
     QObject::connect(ui->ProcessesList->GetUi()->LiveProcessList->GetTreeView(),
                      &OrbitTreeView::clicked, overlay, &TutorialOverlay::NextStep);
   });
 
-  dlg->SetupStep(1, ui->ModulesList->GetUi()->treeView, [this](TutorialOverlay* overlay) {
+  dlg->SetupStep(1, ui->ModulesList, [this](TutorialOverlay* overlay) {
+    ui->MainTabWidget->setCurrentIndex(0);
     QObject::connect(ui->ModulesList->GetUi()->treeView, &OrbitTreeView::clicked, overlay,
                      &TutorialOverlay::NextStep);
   });

@@ -1,5 +1,17 @@
 <RCC>
   <qresource prefix="images">
+    <file>tutorial/arrow_down1_yellow.png</file>
+    <file>tutorial/arrow_down2_yellow.png</file>
+    <file>tutorial/arrow_left1_yellow.png</file>
+    <file>tutorial/arrow_left2_yellow.png</file>
+    <file>tutorial/arrow_left3_yellow.png</file>
+    <file>tutorial/arrow_left4_yellow.png</file>
+    <file>tutorial/arrow_right1_yellow.png</file>
+    <file>tutorial/arrow_right2_yellow.png</file>
+    <file>tutorial/arrow_right3_yellow.png</file>
+    <file>tutorial/arrow_right4_yellow.png</file>
+    <file>tutorial/arrow_up1_yellow.png</file>
+    <file>tutorial/arrow_up2_yellow.png</file>
     <file>tutorial/arrow_down2.png</file>
     <file>tutorial/arrow_left1.png</file>
     <file>tutorial/arrow_left2.png</file>

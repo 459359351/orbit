@@ -40,13 +40,12 @@ void TutorialOverlay::InitializeStepsFromUi() {
     QWidget* tab = ui_->tabWidget->widget(tab_i);
 
     Step step;
-    step.cutout_widget = tab->findChild<QLabel*>();
+    step.cutout_widget = tab->findChild<CutoutWidget*>();
     if (step.cutout_widget) {
       QRect cutout_rect = step.cutout_widget->geometry();
-      for (auto frame : tab->findChildren<QFrame*>()) {
-        if (frame != step.cutout_widget && frame->parent() == tab) {
-          frame->setStyleSheet("QFrame { border: 0; }");
-          step.hints.push_back(DeriveHintDescription(cutout_rect, frame));
+      for (auto child : tab->findChildren<QWidget*>()) {
+        if (child != step.cutout_widget && child->parent() == tab) {
+          step.hints.push_back(DeriveHintDescription(cutout_rect, child));
         }
       }
     }
@@ -150,7 +149,7 @@ void TutorialOverlay::UpdateGeometry() {
     outer_rect.setBottomRight(outer_rect.bottomRight() + margin);
 
     QRegion maskedRegion(QRegion(QRect(rect())).subtracted(QRegion(target_rect)));
-    setMask(maskedRegion);
+    // setMask(maskedRegion);
 
     step.cutout_widget->setGeometry(outer_rect);
 
@@ -196,21 +195,17 @@ TutorialOverlay::Hint TutorialOverlay::DeriveHintDescription(QRect anchor_rect,
   }
 
   switch (result.anchor) {
-    // Anchored top left: Top right label corner is reference
     case HintAnchor::kTopLeft:
-      result.offset = hint_rect.topRight() - anchor_rect.topLeft();
+      result.offset = hint_rect.topLeft() - anchor_rect.topLeft();
       break;
-    // Anchored top right: Top left label corner is reference
     case HintAnchor::kTopRight:
       result.offset = hint_rect.topLeft() - anchor_rect.topRight();
       break;
-    // Anchored bottom right: Top left label corner is reference
     case HintAnchor::kBottomRight:
       result.offset = hint_rect.topLeft() - anchor_rect.bottomRight();
       break;
-    // Anchored bottom left: Top right label corner is reference
     case HintAnchor::kBottomLeft:
-      result.offset = hint_rect.topRight() - anchor_rect.bottomLeft();
+      result.offset = hint_rect.topLeft() - anchor_rect.bottomLeft();
       break;
   }
 
@@ -219,14 +214,13 @@ TutorialOverlay::Hint TutorialOverlay::DeriveHintDescription(QRect anchor_rect,
 
 void TutorialOverlay::UpdateHintWidgetPosition(QRect anchor_rect, Hint& hint) {
   const QPoint size(hint.widget->rect().width(), hint.widget->rect().height());
-  QPoint tl, br, tr, bl;
+  QPoint tl, br;
 
   // See comments in DeriveHintDescription() on how offsets and anchors
   // are calculated
   switch (hint.anchor) {
     case HintAnchor::kTopLeft:
-      tr = anchor_rect.topLeft() + hint.offset;
-      tl = tr - QPoint(0, size.y());
+      tl = anchor_rect.topLeft() + hint.offset;
       break;
     case HintAnchor::kTopRight:
       tl = anchor_rect.topRight() + hint.offset;
@@ -235,8 +229,7 @@ void TutorialOverlay::UpdateHintWidgetPosition(QRect anchor_rect, Hint& hint) {
       tl = anchor_rect.bottomRight() + hint.offset;
       break;
     case HintAnchor::kBottomLeft:
-      tr = anchor_rect.bottomLeft() + hint.offset;
-      tl = tr - QPoint(0, size.y());
+      tl = anchor_rect.bottomLeft() + hint.offset;
       break;
   }
 
