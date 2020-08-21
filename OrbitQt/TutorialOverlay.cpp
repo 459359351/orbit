@@ -24,6 +24,7 @@ TutorialOverlay::TutorialOverlay(QWidget* parent)
 
   ui_->tabWidget->raise();
   ui_->bottomBar->raise();
+  ui_->bottomBar->hide();
   ui_->errorHint->hide();
   QTabBar* tabBar = ui_->tabWidget->findChild<QTabBar*>();
   tabBar->hide();
@@ -41,9 +42,10 @@ void TutorialOverlay::InitializeStepsFromUi() {
     Step step;
     step.cutout_widget = tab->findChild<QLabel*>();
     if (step.cutout_widget) {
-      QRect cutout_rect = step.cutout_widget->rect();
+      QRect cutout_rect = step.cutout_widget->geometry();
       for (auto frame : tab->findChildren<QFrame*>()) {
         if (frame != step.cutout_widget && frame->parent() == tab) {
+          frame->setStyleSheet("QFrame { border: 0; }");
           step.hints.push_back(DeriveHintDescription(cutout_rect, frame));
         }
       }
@@ -153,7 +155,7 @@ void TutorialOverlay::UpdateGeometry() {
     step.cutout_widget->setGeometry(outer_rect);
 
     for (auto& hint : step.hints) {
-      UpdateHintWidgetPosition(target_rect, hint);
+      UpdateHintWidgetPosition(outer_rect, hint);
     }
 
     border_labels_[0]->setGeometry(0, 0, rect().width(), target_rect.top());
@@ -172,7 +174,7 @@ void TutorialOverlay::UpdateGeometry() {
 
 TutorialOverlay::Hint TutorialOverlay::DeriveHintDescription(QRect anchor_rect,
                                                              QWidget* hint_widget) {
-  QRect hint_rect = hint_widget->rect();
+  QRect hint_rect = hint_widget->geometry();
 
   // The anchor position is determined by the quadrant of anchor_rect in which the top
   // left corner of hint_rect is placed initially.
